@@ -7,10 +7,20 @@
     "default_icon": "images/logo-16.png",
     "default_title": "Click to open panel"
   },
+  "options_ui": {
+    "page": "user_config.html",
+    "open_in_tab": false
+  },
   "background": {
     "service_worker": "service_worker.js"
   },
-  "permissions": ["activeTab", "scripting", "sidePanel", "contextMenus"],
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "sidePanel",
+    "contextMenus",
+    "storage"
+  ],
   "side_panel": {
     "default_path": "sidepanel.html"
   },

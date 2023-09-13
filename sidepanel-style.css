@@ -9,6 +9,7 @@
     border: none;
     outline: none;
     transition: 0.4s;
+    font-weight: bold;
 }
 
 .accordion:after {
@@ -25,7 +26,7 @@
 
 /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
 .active, .accordion:hover {
-    background-color: #ccc;
+    background-color: #fa8a8a;
 }
 
 /* Style the accordion panel. Note: hidden by default */
@@ -36,3 +37,12 @@
     overflow: hidden;
     transition: max-height 0.2s ease-out;
   }
+
+.output-area {
+    padding: 10px;
+    min-height: 300px;
+    font-size: medium;
+    background-color: #eee;
+    background-color: #eee;
+    margin: 5px 0px;
+}
