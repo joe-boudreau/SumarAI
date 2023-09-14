@@ -45,21 +45,47 @@ async function getPromptCompletion(prompt) {
     return result.openAiApiKey;
   }
 
+//Populate the languages list
+const langSelector = document.getElementById("language-select");
+fetch('./languages.json').then((file) => file.json()).then((languages) => {
+  languages.forEach((l) => {
+    const option = document.createElement("option");
+    option.value = l;
+    option.text = l;
+    langSelector.appendChild(option);
+  });
+});
+
+var textToTranslate = "";
+
 chrome.runtime.onMessage.addListener(async ({ name, data }) => {
+  closeAllPanels();
   if (name === 'summarize-text') {
     openPanel(document.getElementById("summarize-acc"))
     const summarizePrompt = `Please summarize the following text in 2 or 3 sentences. Don't worry about the context, just try to rephrase the text more concisely. 2 or 3 sentences at most. Text: """ ${data.value} """`
     const response = await getPromptCompletion(summarizePrompt);
-    //const response = "Even if you could hypothetically build a constantly updating database of all of the untold billions of pages on the internet, the storage and bandwidth costs alone would bankrupt practically any company on the planet. And thatâ€™s not even counting the cost of searching that database millions or billions of times a day. Add in the fact that every millisecond matters â€” Google still advertises how long every query took at the top of your results â€” and you donâ€™t have time to look over the whole database, anyway.Even if you could hypothetically build a constantly updating database of all of the untold billions of pages on the internet, the storage and bandwidth costs alone would bankrupt practically any company on the planet. And thatâ€™s not even counting the cost of searching that database millions or billions of times a day. Add in the fact that every millisecond matters â€” Google still advertises how long every query took at the top of your results â€” and you donâ€™t have time to look over the whole database, anyway.";
     document.getElementById("summarize-output").textContent = response;
     const panel = document.getElementById("summarize-panel");
     // Reset the panel height in case the response overflows
     panel.style.maxHeight = panel.scrollHeight + "px";
   }
   else if (name === 'translate-text') {
-    // TODO
+    openPanel(document.getElementById("translate-acc"));
+    textToTranslate = data.value;
   }
 });
+
+
+document.getElementById("translate-lang-button").addEventListener("click", async () => {
+  const outputLang = document.getElementById("language-select").value;
+  const translatePrompt = `Please translate the following text from English to ${outputLang}. Text: ${textToTranslate}`
+  const response = await getPromptCompletion(translatePrompt);
+  document.getElementById("translate-output").textContent = response;
+  const panel = document.getElementById("translate-panel");
+  // Reset the panel height in case the response overflows
+  panel.style.maxHeight = panel.scrollHeight + "px";
+});
+
 
 var acc = document.getElementsByClassName("accordion");
 var i;
@@ -76,5 +102,12 @@ function openPanel(accordianButton) {
   } else {
     panel.style.maxHeight = panel.scrollHeight + "px";
   }
+}
+
+function closeAllPanels() {
+  Array.from(document.getElementsByClassName("accordion")).forEach((acc) => {
+    acc.classList.remove("active");
+    acc.nextElementSibling.style.maxHeight = null;
+  });
 }
 
