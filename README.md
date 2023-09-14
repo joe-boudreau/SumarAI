@@ -3,6 +3,7 @@ Provides some ChatGPT functionality as a chrome extension, accessible via contex
 
 # How to Use
 Simply highlight text of interest in any chrome window, right-click and choose the function from the extension's context menu
+
 ![Context Menu](./readme-images/context-menu-ex.png)
 
 # Current Functionality
