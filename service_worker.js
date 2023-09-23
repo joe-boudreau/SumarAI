@@ -1,3 +1,6 @@
+/**
+ * Service worker sets up the context menu actions for the extension
+ **/
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -27,6 +30,7 @@ chrome.contextMenus.onClicked.addListener(async (data, tab) => {
   await chrome.sidePanel.open({tabId: tab.id});
   // Wait a little bit for the message listener to be initialized in the side panel JS (if it was just opened)
   await sleep(500);
+  // Send message to the listener initialized in the sidepanel JS
   if (data.menuItemId === 'summarize-text') {
     chrome.runtime.sendMessage({
       name: 'summarize-text',

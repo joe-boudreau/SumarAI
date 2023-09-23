@@ -61,40 +61,75 @@ var textToTranslate = "";
 chrome.runtime.onMessage.addListener(async ({ name, data }) => {
   closeAllPanels();
   if (name === 'summarize-text') {
-    openPanel(document.getElementById("summarize-acc"))
-    const summarizePrompt = `Please summarize the following text in 2 or 3 sentences. Don't worry about the context, just try to rephrase the text more concisely. 2 or 3 sentences at most. Text: """ ${data.value} """`
-    const response = await getPromptCompletion(summarizePrompt);
-    document.getElementById("summarize-output").textContent = response;
-    const panel = document.getElementById("summarize-panel");
-    // Reset the panel height in case the response overflows
-    panel.style.maxHeight = panel.scrollHeight + "px";
+    generateAndPrintSummary(data.value);
   }
   else if (name === 'translate-text') {
-    openPanel(document.getElementById("translate-acc"));
+    openAccordian(document.getElementById("translate-acc"));
     textToTranslate = data.value;
   }
 });
 
+async function generateAndPrintSummary(text) {
+  openAccordian(document.getElementById("summarize-acc"))
+  const panel = document.getElementById("summarize-panel");
+  const loader = panel.getElementsByClassName("loader")[0];
+  loader.style.display = "block";
+  try {
+    const lengthDesc = getSummarizeLengthDesc(text);
+    const summarizePrompt = `Please summarize the following text in ${lengthDesc}. Don't worry about the context, just try to rephrase the text more concisely. Text: """ ${text} """`
+    const response = await getPromptCompletion(summarizePrompt);
+    document.getElementById("summarize-output").textContent = response;
+    // Reset the panel height in case the response overflows
+    panel.style.maxHeight = panel.scrollHeight + "px";
+  } catch (error) {
+    document.getElementById("summarize-output").textContent = "Error";
+  } finally {
+    loader.style.display = "none";
+  }
+}
+
+function getSummarizeLengthDesc(text) {
+    const wordCount = text.trim().split(/\s+/).length;
+    if (wordCount < 500) {
+      return "2 to 3 sentences";
+    }
+    else if (wordCount < 1000) {
+      return "4 to 7 sentences";
+    }
+    else if (wordCount < 2000) {
+      return "8 to 11 sentences"
+    }
+    else {
+      return "12 to 14 sentences"
+    }
+}
 
 document.getElementById("translate-lang-button").addEventListener("click", async () => {
-  const outputLang = document.getElementById("language-select").value;
-  const translatePrompt = `Please translate the following text from English to ${outputLang}. Text: ${textToTranslate}`
-  const response = await getPromptCompletion(translatePrompt);
-  document.getElementById("translate-output").textContent = response;
   const panel = document.getElementById("translate-panel");
-  // Reset the panel height in case the response overflows
-  panel.style.maxHeight = panel.scrollHeight + "px";
+  const loader = panel.getElementsByClassName("loader")[0];
+  loader.style.display = "block";
+  try {
+    const outputLang = document.getElementById("language-select").value;
+    const translatePrompt = `Please translate the following text from English to ${outputLang}. Text: ${textToTranslate}`
+    const response = await getPromptCompletion(translatePrompt);
+    document.getElementById("translate-output").textContent = response;
+    // Reset the panel height in case the response overflows
+    panel.style.maxHeight = panel.scrollHeight + "px";
+  } catch (err) {
+    document.getElementById("translate-output").textContent = "Error";
+  } finally {
+    loader.style.display = "none";
+  }
 });
 
 
 var acc = document.getElementsByClassName("accordion");
 var i;
 for (i = 0; i < acc.length; i++) {
-  acc[i].addEventListener("click", function() {openPanel(this);});
+  acc[i].addEventListener("click", function() {openAccordian(this);});
 }
 
-function openPanel(accordianButton) {
-  console.log('opening panel: ' + accordianButton.id)
+function openAccordian(accordianButton) {
   accordianButton.classList.toggle("active");
   var panel = accordianButton.nextElementSibling;
   if (panel.style.maxHeight) {
