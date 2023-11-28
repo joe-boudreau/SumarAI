@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "ChatGPT Helper",
-  "description": "TODO",
-  "version": "1.0",
+  "description": "Access ChatGPT functionality in a side panel with easy context menu actions",
+  "version": "0.1",
   "action": {
     "default_icon": "images/logo-16.png",
     "default_title": "Click to open panel"
@@ -15,8 +15,6 @@
     "service_worker": "service_worker.js"
   },
   "permissions": [
-    "activeTab",
-    "scripting",
     "sidePanel",
     "contextMenus",
     "storage"
