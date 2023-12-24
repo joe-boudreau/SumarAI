@@ -79,10 +79,10 @@ function showTranslateOptions() {
 
 function summarizeArticle(article) {
   let {title, textContent, byline, siteName, lang} = article
-  console.log(textContent);
+  console.log(article);
   const lengthDesc = getSummarizeLengthDesc(textContent);
-  const summarizePrompt = `Please summarize the following article in ${lengthDesc}. Article: """ ${textContent} """`
-  outputChatGPTPromptResponse(summarizePrompt);
+  const summarizePrompt = `Please summarize the following article in ${lengthDesc}. Output the summary in HTML format. Article: """ ${textContent} """`
+  outputChatGPTPromptResponseHtml(title, byline, summarizePrompt);
 }
 
 function generateAndPrintSummary(text) {
@@ -94,16 +94,13 @@ function generateAndPrintSummary(text) {
 function getSummarizeLengthDesc(text) {
     const wordCount = text.trim().split(/\s+/).length;
     if (wordCount < 500) {
-      return "2 to 3 sentences";
+      return "1 paragraph";
     }
     else if (wordCount < 1000) {
-      return "4 to 7 sentences";
-    }
-    else if (wordCount < 2000) {
-      return "8 to 11 sentences"
+      return "1 or 2 paragraphs";
     }
     else {
-      return "12 to 14 sentences"
+      return "2 or 3 paragraphs"
     }
 }
 
@@ -131,6 +128,50 @@ export async function outputChatGPTPromptResponse(prompt) {
     const langSelector = document.getElementById("lang-selector");
     langSelector.style.display = "none";
   }
+}
+const articleSummaryTemplate = `
+  <h2>{Title}</h2>
+  <h4 class="byline">{Byline}</h4>
+  <p class="site-url">Site: <a href="{URL}">{Hostname}</a></p>
+  <br/>
+  <div class="summary">{Summary}</div>
+`
+
+function generateArticleSummaryHtml(title, byline, url, summary) {
+  const { hostname } = new URL(url);
+  return articleSummaryTemplate
+    .replace("{Title}", title)
+    .replace("{Byline}", byline)
+    .replace("{Hostname}", hostname)
+    .replace("{URL}", url)
+    .replace("{Summary}", summary)
+}
+
+export async function outputChatGPTPromptResponseHtml(title, byline, prompt) {
+  const outputArea = document.getElementById("output-area");
+  const loader = outputArea.getElementsByClassName("loader")[0];
+  const outputDiv = outputArea.getElementsByClassName("output")[0];
+  loader.style.display = "block";
+
+  try {
+    const response = await getPromptCompletion(prompt);
+    const summaryHtml = generateArticleSummaryHtml(title, byline, await getCurrentTabUrl(), response)
+    outputDiv.innerHTML = summaryHtml;
+  } catch (err) {
+    outputDiv.textContent = `Error: ${err.message}`;
+  } finally {
+    loader.style.display = "none";
+    // Hide the language selector
+    const langSelector = document.getElementById("lang-selector");
+    langSelector.style.display = "none";
+  }
+}
+
+async function getCurrentTabUrl() {
+  let queryOptions = { active: true, lastFocusedWindow: true };
+  // `tab` will either be a `tabs.Tab` instance or `undefined`.
+  let [tab] = await chrome.tabs.query(queryOptions);
+  return tab.url;
 }
 
 
