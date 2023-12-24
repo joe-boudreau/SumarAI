@@ -34,13 +34,15 @@ async function getPromptCompletion(prompt) {
 
     } catch (error) {
       console.error(error);
+      console.log(error.message)
+      throw error;
     }
   }
 
   async function getAPIKey() {
     const result = await chrome.storage.local.get('openAiApiKey');
     if (!result.openAiApiKey) {
-      // TODO show error and offer link to options config
+      throw new Error("Missing OpenAI API Key")
     }
     return result.openAiApiKey;
   }
@@ -58,34 +60,35 @@ fetch('./languages.json').then((file) => file.json()).then((languages) => {
 
 var textToTranslate = "";
 
-chrome.runtime.onMessage.addListener(async ({ name, data }) => {
-  closeAllPanels();
+chrome.runtime.onMessage.addListener(({ name, data }) => {
+  if (name === 'summarize-article') {
+    summarizeArticle(data)
+  }
   if (name === 'summarize-text') {
-    generateAndPrintSummary(data.value);
+    generateAndPrintSummary(data);
   }
   else if (name === 'translate-text') {
-    openAccordian(document.getElementById("translate-acc"));
-    textToTranslate = data.value;
+    textToTranslate = data;
+    showTranslateOptions();
   }
 });
 
-async function generateAndPrintSummary(text) {
-  openAccordian(document.getElementById("summarize-acc"))
-  const panel = document.getElementById("summarize-panel");
-  const loader = panel.getElementsByClassName("loader")[0];
-  loader.style.display = "block";
-  try {
+function showTranslateOptions() {
+  document.getElementById("lang-selector").style.display = 'block';
+}
+
+function summarizeArticle(article) {
+  let {title, textContent, byline, siteName, lang} = article
+  console.log(textContent);
+  const lengthDesc = getSummarizeLengthDesc(textContent);
+  const summarizePrompt = `Please summarize the following article in ${lengthDesc}. Article: """ ${textContent} """`
+  outputChatGPTPromptResponse(summarizePrompt);
+}
+
+function generateAndPrintSummary(text) {
     const lengthDesc = getSummarizeLengthDesc(text);
     const summarizePrompt = `Please summarize the following text in ${lengthDesc}. Don't worry about the context, just try to rephrase the text more concisely. Text: """ ${text} """`
-    const response = await getPromptCompletion(summarizePrompt);
-    document.getElementById("summarize-output").textContent = response;
-    // Reset the panel height in case the response overflows
-    panel.style.maxHeight = panel.scrollHeight + "px";
-  } catch (error) {
-    document.getElementById("summarize-output").textContent = "Error";
-  } finally {
-    loader.style.display = "none";
-  }
+    outputChatGPTPromptResponse(summarizePrompt);
 }
 
 function getSummarizeLengthDesc(text) {
@@ -105,44 +108,29 @@ function getSummarizeLengthDesc(text) {
 }
 
 document.getElementById("translate-lang-button").addEventListener("click", async () => {
-  const panel = document.getElementById("translate-panel");
-  const loader = panel.getElementsByClassName("loader")[0];
-  loader.style.display = "block";
-  try {
     const outputLang = document.getElementById("language-select").value;
-    const translatePrompt = `Please translate the following text from English to ${outputLang}. Text: ${textToTranslate}`
-    const response = await getPromptCompletion(translatePrompt);
-    document.getElementById("translate-output").textContent = response;
-    // Reset the panel height in case the response overflows
-    panel.style.maxHeight = panel.scrollHeight + "px";
+    const translatePrompt = `Please translate the following text from English to ${outputLang}. Text: ${textToTranslate}`;
+    outputChatGPTPromptResponse(translatePrompt);
+});      
+
+export async function outputChatGPTPromptResponse(prompt) {
+  const outputDiv = document.getElementById("output");
+  const loader = outputDiv.getElementsByClassName("loader")[0];
+  if (loader) {
+    loader.style.display = "block";
+  }
+
+  try {
+    const response = await getPromptCompletion(prompt);
+    outputDiv.textContent = response;
   } catch (err) {
-    document.getElementById("translate-output").textContent = "Error";
+    outputDiv.textContent = `Error: ${err.message}`;
   } finally {
     loader.style.display = "none";
-  }
-});
-
-
-var acc = document.getElementsByClassName("accordion");
-var i;
-for (i = 0; i < acc.length; i++) {
-  acc[i].addEventListener("click", function() {openAccordian(this);});
-}
-
-function openAccordian(accordianButton) {
-  accordianButton.classList.toggle("active");
-  var panel = accordianButton.nextElementSibling;
-  if (panel.style.maxHeight) {
-    panel.style.maxHeight = null;
-  } else {
-    panel.style.maxHeight = panel.scrollHeight + "px";
+    // Hide the language selector
+    const langSelector = document.getElementById("lang-selector");
+    langSelector.style.display = "none";
   }
 }
 
-function closeAllPanels() {
-  Array.from(document.getElementsByClassName("accordion")).forEach((acc) => {
-    acc.classList.remove("active");
-    acc.nextElementSibling.style.maxHeight = null;
-  });
-}
 
