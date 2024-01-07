@@ -1,51 +1,5 @@
-async function getPromptCompletion(prompt) {
-    try {
-      const openAiApiKey = await getAPIKey();
-      const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("Authorization", `Bearer ${openAiApiKey}`);
-      const body = {
-        model: "gpt-3.5-turbo",
-        temperature: 0.2,
-        messages: [
-            {role: "system", content: "You are a helpful assistant."},
-            {role: "user", content: prompt},
-        ]
-      };
-      const jsonBody = JSON.stringify(body)
-
-
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: headers,
-        body: jsonBody
-      });
-
-      // Check if the response status is OK (status code 200)
-      if (!response.ok) {
-        throw new Error('Failed to get response from ChatGPT');
-      }
-
-      // Parse the response JSON
-      const responseJson = await response.json();
-
-      console.log(responseJson);
-      return responseJson.choices[0].message.content;
-
-    } catch (error) {
-      console.error(error);
-      console.log(error.message)
-      throw error;
-    }
-  }
-
-  async function getAPIKey() {
-    const result = await chrome.storage.local.get('openAiApiKey');
-    if (!result.openAiApiKey) {
-      throw new Error("Missing OpenAI API Key")
-    }
-    return result.openAiApiKey;
-  }
+import { SUMMARIZE_ARTICLE, SUMMARIZE_SELECTION, TRANSLATE_SELECTION } from "./serviceWorker";
+import { getPromptCompletion } from "./openAIClient";
 
 //Populate the languages list
 const langSelector = document.getElementById("language-select");
@@ -61,13 +15,13 @@ fetch('./languages.json').then((file) => file.json()).then((languages) => {
 var textToTranslate = "";
 
 chrome.runtime.onMessage.addListener(({ name, data }) => {
-  if (name === 'summarize-article') {
+  if (name === SUMMARIZE_ARTICLE) {
     summarizeArticle(data)
   }
-  if (name === 'summarize-text') {
+  if (name === SUMMARIZE_SELECTION) {
     generateAndPrintSummary(data);
   }
-  else if (name === 'translate-text') {
+  else if (name === TRANSLATE_SELECTION) {
     textToTranslate = data;
     showTranslateOptions();
   }

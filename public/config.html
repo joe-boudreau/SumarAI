@@ -3,9 +3,13 @@
   <body>
     <label for="name">OpenAI API Key:</label>
     <input type="text" id="openai-api-key" name="openai-api-key" size="60" />
+    <label for="name">OpenAI Model:</label>
+    <select id="openai-model-select" name="openai-model-select">
+      <option value="default" selected>default</option>
+    </select>
     <button id="save">Save</button>
     <div id="status"></div>
 
-    <script src="extConfig.js"></script>
+    <script src="config.js"></script>
   </body>
 </html>

@@ -8,7 +8,7 @@
     "default_title": "Click to open panel"
   },
   "options_ui": {
-    "page": "extConfig.html",
+    "page": "config.html",
     "open_in_tab": false
   },
   "background": {
@@ -19,8 +19,7 @@
     "scripting",
     "sidePanel",
     "contextMenus",
-    "storage",
-    "tabs"
+    "storage"
   ],
   "side_panel": {
     "default_path": "sidepanel.html"

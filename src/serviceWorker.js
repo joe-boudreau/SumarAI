@@ -1,57 +1,65 @@
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-function setupContextMenu() {
+/**
+ * Context menu actions
+ */
+export const SUMMARIZE_SELECTION = 'summarize-selection';
+export const TRANSLATE_SELECTION = 'translate-selection';
+export const SUMMARIZE_ARTICLE = 'summarize-article';
+
+/**
+ * Add the extension's context menu items
+ */
+chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
-    id: 'summarize-text',
+    id: SUMMARIZE_SELECTION,
     title: 'Summarize',
     contexts: ['selection']
   });
   chrome.contextMenus.create({
-    id: 'translate-text',
+    id: TRANSLATE_SELECTION,
     title: 'Translate',
     contexts: ['selection']
   });
   chrome.contextMenus.create({
-    id: 'summarize-article',
+    id: SUMMARIZE_ARTICLE,
     title: 'Summarize Article',
     contexts: ['all']
   })
-}
-
-chrome.runtime.onInstalled.addListener(() => {
-  setupContextMenu();
 });
 
+/**
+ * Add event handling for when the exension's context menu actions are clicked
+ */
 chrome.contextMenus.onClicked.addListener(async (data, tab) => {
+  
+  if (tab.url.includes('chrome://')) {
+    return; //TODO: handle nicely
+  }
+
   chrome.sidePanel.open({tabId: tab.id});
   // Wait a little bit for the message listener to be initialized in the side panel JS (if it was just opened)
   await sleep(500);
+
   // Send message to the listener initialized in the sidepanel JS
+  let msgData;
   switch (data.menuItemId) {
-    case 'summarize-text':
-      chrome.runtime.sendMessage({
-        name: 'summarize-text',
-        data: data.selectionText
-      });
+    case SUMMARIZE_SELECTION:
+    case TRANSLATE_SELECTION:
+      msgData = data.selectionText
       break;
-    case 'translate-text':
-      chrome.runtime.sendMessage({
-        name: 'translate-text',
-        data: data.selectionText
-      });
+    case SUMMARIZE_ARTICLE:
+      msgData = await getArticleFromCurrentTab(tab);
       break;
-    case 'summarize-article':
-      if (tab.url.includes('chrome://')) {
-        return; //TODO: handle nicely
-      }
-      const article = await getArticleFromCurrentTab(tab);
-      chrome.runtime.sendMessage({
-        name: 'summarize-article',
-        data: article
-      });
-      break;
+    default:
+      throw new Error(`Unknown menu item ID: ${data.menuItemId}`)
   }
+  chrome.runtime.sendMessage({
+    name: data.menuItemId,
+    data: data.selectionText
+  });
 });
+
 
 async function getArticleFromCurrentTab(tab) {
   const injectionResults = await chrome.scripting.executeScript({

@@ -9,7 +9,7 @@ const PATHS = require('./paths');
 const config = (env, argv) =>
   merge(common, {
     entry: {
-      extConfig: PATHS.src + '/extConfig.js',
+      config: PATHS.src + '/config.js',
       sidepanel: PATHS.src + '/sidepanel.js',
       serviceWorker: PATHS.src + '/serviceWorker.js',
     },
