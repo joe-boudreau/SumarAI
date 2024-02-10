@@ -6,6 +6,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 export const SUMMARIZE_SELECTION = 'summarize-selection';
 export const TRANSLATE_SELECTION = 'translate-selection';
 export const SUMMARIZE_ARTICLE = 'summarize-article';
+export const TRANSLATE_ARTICLE = 'translate-article';
 
 /**
  * Add the extension's context menu items
@@ -26,6 +27,11 @@ chrome.runtime.onInstalled.addListener(() => {
     title: 'Summarize Article',
     contexts: ['all']
   })
+  chrome.contextMenus.create({
+    id: TRANSLATE_ARTICLE,
+    title: 'Translate Article',
+    contexts: ['all']
+  });
 });
 
 /**
@@ -49,6 +55,7 @@ chrome.contextMenus.onClicked.addListener(async (data, tab) => {
       msgData = data.selectionText
       break;
     case SUMMARIZE_ARTICLE:
+    case TRANSLATE_ARTICLE:
       msgData = await getArticleFromCurrentTab(tab);
       break;
     default:
@@ -56,7 +63,7 @@ chrome.contextMenus.onClicked.addListener(async (data, tab) => {
   }
   chrome.runtime.sendMessage({
     name: data.menuItemId,
-    data: data.selectionText
+    data: msgData
   });
 });
 

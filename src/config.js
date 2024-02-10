@@ -1,7 +1,5 @@
 import { listAvailableModels } from "./openAIClient";
-
-document.addEventListener('DOMContentLoaded', restoreOptions);
-document.getElementById('save').addEventListener('click', saveOptions);
+import { getOpenAIModel, getAPIKey, saveOptions } from "./storage"
 
 // Saves options to chrome.storage
 const saveOptions = async () => {
@@ -9,10 +7,7 @@ const saveOptions = async () => {
     const openAiModel = document.getElementById('openai-model-select').value;
     let msg;
     try {
-      await chrome.storage.local.set({ 
-        openAiApiKey,
-        openAiModel,
-      });
+      saveOptions(openAiApiKey, openAiModel);
       msg = 'Saved!';
     } catch(e) {
       msg = `Failed to save: ${e.message ?? 'error'}`
@@ -26,14 +21,12 @@ const saveOptions = async () => {
 
 // Restores UI using the preferences stored in chrome.storage
 const restoreOptions = async () => {
-  const options = await chrome.storage.local.get({
-    openAiApiKey: '',
-    openAiModel: 'default'
-  });
+  const openAiApiKey = getAPIKey()
+  const openAiModel = getOpenAIModel()
 
-  document.getElementById('openai-api-key').value = options.openAiApiKey;
+  document.getElementById('openai-api-key').value = openAiApiKey;
   if (options.openAiApiKey) {
-    await populateModelSelector(options.openAiModel);
+    await populateModelSelector(openAiModel);
   } 
 };
 
@@ -52,12 +45,5 @@ async function populateModelSelector(currentModel) {
   });
 }
 
-export async function getOpenAIModel() {
-  const {openAiModel} = await chrome.storage.local.get({openAiModel: 'default'});
-  return openAiModel;
-}
-
-export async function getAPIKey() {
-  const {openAiApiKey} = await chrome.storage.local.get({openAiApiKey: ''});
-  return openAiApiKey;
-}
+document.addEventListener('DOMContentLoaded', restoreOptions);
+document.getElementById('save').addEventListener('click', saveOptions);

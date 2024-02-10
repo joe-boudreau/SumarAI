@@ -1,15 +1,19 @@
 #output-area {
     padding: 10px;
-    min-height: 300px;
+    height: 50vh;
     font-size: medium;
     background-color: #eee;
-    background-color: #eee;
     margin: 5px 0px;
+    overflow-y: scroll;
 }
 
-#lang-selector {
-    padding-top: 10px;
-    display: none;
+#footer {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
 }
 
 .loader {

@@ -1,4 +1,4 @@
-import { getAPIKey } from "./config";
+import { getAPIKey } from "./storage";
 
 export async function getPromptCompletion(prompt) {
     try {

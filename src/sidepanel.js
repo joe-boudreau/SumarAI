@@ -2,17 +2,21 @@ import { SUMMARIZE_ARTICLE, SUMMARIZE_SELECTION, TRANSLATE_SELECTION } from "./s
 import { getPromptCompletion } from "./openAIClient";
 
 //Populate the languages list
-const langSelector = document.getElementById("language-select");
-fetch('./languages.json').then((file) => file.json()).then((languages) => {
-  languages.forEach((l) => {
-    const option = document.createElement("option");
-    option.value = l;
-    option.text = l;
-    langSelector.appendChild(option);
-  });
-});
+// const langSelector = document.getElementById("language-select");
+// fetch('./languages.json').then((file) => file.json()).then((languages) => {
+//   languages.forEach((l) => {
+//     const option = document.createElement("option");
+//     option.value = l;
+//     option.text = l;
+//     langSelector.appendChild(option);
+//   });
+// });
 
-var textToTranslate = "";
+// document.getElementById("translate-lang-button").addEventListener("click", async () => {
+//   const outputLang = document.getElementById("language-select").value;
+//   const translatePrompt = `Please translate the following text from English to ${outputLang}. Text: ${textToTranslate}`;
+//   outputChatGPTPromptResponse(translatePrompt);
+// });      
 
 chrome.runtime.onMessage.addListener(({ name, data }) => {
   if (name === SUMMARIZE_ARTICLE) {
@@ -57,12 +61,6 @@ function getSummarizeLengthDesc(text) {
       return "2 or 3 paragraphs"
     }
 }
-
-document.getElementById("translate-lang-button").addEventListener("click", async () => {
-    const outputLang = document.getElementById("language-select").value;
-    const translatePrompt = `Please translate the following text from English to ${outputLang}. Text: ${textToTranslate}`;
-    outputChatGPTPromptResponse(translatePrompt);
-});      
 
 export async function outputChatGPTPromptResponse(prompt) {
   const outputDiv = document.getElementById("output");
