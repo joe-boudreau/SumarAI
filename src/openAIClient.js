@@ -1,4 +1,4 @@
-import { getAPIKey } from "./storage";
+import { getAPIKey, getOpenAIModel } from "./storage";
 
 export async function getPromptCompletion(prompt) {
     try {
@@ -9,11 +9,12 @@ export async function getPromptCompletion(prompt) {
       const headers = new Headers();
       headers.append("Content-Type", "application/json");
       headers.append("Authorization", `Bearer ${openAiApiKey}`);
+      const openAiModel = await getOpenAIModel();
       const body = {
         model: "gpt-3.5-turbo",
         temperature: 0.2,
         messages: [
-            {role: "system", content: "You are a helpful assistant."},
+            {role: "system", content: "You are an expert summarizer that can synthesize articles and provide the main points in a easily understandable format."},
             {role: "user", content: prompt},
         ]
       };

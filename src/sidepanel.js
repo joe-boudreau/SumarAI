@@ -1,6 +1,10 @@
 import { SUMMARIZE_SHORT, SUMMARIZE_MEDIUM, SUMMARIZE_LONG } from "./serviceWorker";
 import { getPromptCompletion } from "./openAIClient";
  
+const SUMMARIZE_PROMPT = `Please summarize the following article in approximately {LengthDesc}.
+Output an HTML formatted summary. Don't output anything other than valid HTML in your response.
+Article: """ {ArticleText} """
+`
 
 chrome.runtime.onMessage.addListener(({ name, data }) => {
   summarizeArticle(name, data)
@@ -10,7 +14,10 @@ chrome.runtime.onMessage.addListener(({ name, data }) => {
 function summarizeArticle(name, article) {
   let { title, textContent, byline } = article
   const lengthDesc = getSummarizeLengthDesc(textContent, name);
-  const summarizePrompt = `Please summarize the following article in approximately ${lengthDesc}. Output an HTML formatted summary. Don't include anything other than valid HTML in the response. Article: """ ${textContent} """`
+  const summarizePrompt = SUMMARIZE_PROMPT
+    .replace("{LengthDesc}", lengthDesc)
+    .replace("{ArticleText}", textContent);
+
   outputChatGPTPromptResponseHtml(title, byline, summarizePrompt);
 }
 
@@ -75,12 +82,32 @@ export async function outputChatGPTPromptResponseHtml(title, byline, prompt) {
 
   try {
     const response = await getPromptCompletion(prompt);
-    const summaryHtml = generateArticleSummaryHtml(title, byline, await getCurrentTabUrl(), response)
+    const summary = stripHtmlDelimitersIfPresent(response)
+    const summaryHtml = generateArticleSummaryHtml(title, byline, await getCurrentTabUrl(), summary)
     outputDiv.innerHTML = summaryHtml;
   } catch (err) {
     outputDiv.textContent = `Error: ${err.message}`;
   } finally {
     loader.style.display = "none";
+  }
+}
+
+/**
+ * thanks chatGPT
+ */
+function stripHtmlDelimitersIfPresent(str) {
+  // Regular expression to match the desired format
+  var regex = /^```html([\s\S]*)```$/;
+
+  // Check if the string matches the format
+  var match = regex.exec(str);
+
+  // If there's a match, return the content inside the HTML tags
+  if (match) {
+    return match[1].trim(); // trim() to remove leading and trailing whitespace
+  } else {
+    // If no match, return the original string
+    return str;
   }
 }
 
