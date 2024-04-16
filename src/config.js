@@ -1,5 +1,5 @@
 import { listAvailableModels } from "./openAIClient";
-import { getOpenAIModel, getAPIKey, getLanguage, saveOptions } from "./storage"
+import { getOpenAIModel, getAPIKey, saveOptions } from "./storage"
 
 // Saves options to chrome.storage
 const saveOptionsUI = async () => {
@@ -23,10 +23,8 @@ const saveOptionsUI = async () => {
 const restoreOptions = async () => {
   const openAiApiKey = await getAPIKey()
   const openAiModel = await getOpenAIModel()
-  const language = await getLanguage()
 
   document.getElementById('openai-api-key').value = openAiApiKey;
-  document.getElementById('language').value = language;
 
   if (openAiApiKey) {
     await populateModelSelector(openAiModel);

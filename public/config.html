@@ -1,14 +1,33 @@
 <!DOCTYPE html>
 <html>
+  <meta charset="UTF-8">
+  <head>
+    <link rel="stylesheet" href="config.css">
+  </head>
   <body>
-    <label for="name">OpenAI API Key:</label>
-    <input type="text" id="openai-api-key" name="openai-api-key" size="60" />
-    <label for="name">OpenAI Model:</label>
-    <select id="openai-model-select" name="openai-model-select">
-      <option value="default" selected>default</option>
-    </select>
-    <button id="save">Save</button>
-    <div id="status"></div>
+    <div class="row">
+      <div class="label">
+        <label for="name">OpenAI API Key:</label>
+      </div>
+      <div class="input">
+        <input type="text" id="openai-api-key" name="openai-api-key" size="60" />
+      </div>
+    </div>
+    <div class="row">
+      <div class="label">
+        <label for="name">OpenAI Model:</label>
+      </div>
+      <div class="input">
+        <select id="openai-model-select" name="openai-model-select">
+          <option value="default" selected>default</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <button id="save">Save</button>
+    </div>
+    <div id="status">
+    </div>
 
     <script src="config.js"></script>
   </body>
