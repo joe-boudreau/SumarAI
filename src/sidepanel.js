@@ -96,6 +96,8 @@ export async function outputChatGPTPromptResponseHtml(title, byline, prompt) {
  * thanks chatGPT
  */
 function stripHtmlDelimitersIfPresent(str) {
+  str = str.trim()
+  
   // Regular expression to match the desired format
   var regex = /^```html([\s\S]*)```$/;
 
