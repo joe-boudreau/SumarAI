@@ -1,4 +1,6 @@
 # sumarAI
+![image](https://github.com/user-attachments/assets/ad409335-a6b4-4106-9876-24187838e9a9)
+
 [Chrome Web Store](https://chromewebstore.google.com/detail/sumarai/mkkjeikhldaeolgmcclafecidaggcacc)
 
 Instantly summarize articles on the web using ChatGPT
